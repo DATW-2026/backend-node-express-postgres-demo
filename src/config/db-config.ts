@@ -4,7 +4,7 @@ import debug from 'debug';
 import { env } from './env.ts';
 
 const log = debug(`${env.PROJECT_NAME}:configDB`);
-log('Configuring database connection...');
+log('Loading database connection...');
 
 export const connectDB = async () => {
     const pool = new Pool({

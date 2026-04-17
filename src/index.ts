@@ -1,20 +1,18 @@
 import debug from 'debug';
+import { createServer } from 'node:http';
 
 import { env } from './config/env.ts';
 import { connectDB } from './config/db-config.ts';
-import { createServer } from 'node:http';
-
-import { app } from './app.ts';
+import { createApp } from './app.ts';
 
 const log = debug(`${env.PROJECT_NAME}:index`);
 log('Starting API server...');
 
-await connectDB();
+const pool = await connectDB();
 
 const port = env.PORT || '3000';
-
-const server = createServer(app);
-log('Node Server created');
+const server = createServer(createApp(pool));
+log('Server created');
 
 const listenManager = () => {
     const addr = server.address();
@@ -31,7 +29,7 @@ const listenManager = () => {
     if (env.NODE_ENV !== 'dev') {
         console.log(`Server listening on ${bind}`);
     } else {
-        log(`Servidor escuchando en ${bind}`);
+        log(`Server listening from ${bind}`);
     }
 };
 
