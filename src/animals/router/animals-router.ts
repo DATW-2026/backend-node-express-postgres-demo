@@ -48,7 +48,7 @@ export const animalsRouter = (pool: Pool) => {
         const q = `
             INSERT INTO animals (name, english_name, sci_name, diet, lifestyle, location, slogan, group_name, image)
             VALUES
-            (name = $1, english_name = $2, sci_name = $3, diet = $4, lifestyle = $5, location = $6, slogan = $7, group_name = $8, image = $9)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING *
         `;
         try {
