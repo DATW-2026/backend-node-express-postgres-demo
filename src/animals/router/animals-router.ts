@@ -9,6 +9,7 @@ import {
     type AnimalDTO,
 } from '../schemas/animal.ts';
 import { HttpError } from '../../errors/http-error.ts';
+import { SqlError } from '../../errors/sql-error.ts';
 
 export const animalsRouter = (pool: Pool) => {
     const log = debug(`${env.PROJECT_NAME}:animals-router`);
@@ -67,6 +68,25 @@ export const animalsRouter = (pool: Pool) => {
         } catch (error) {
             next(error);
         }
+    });
+
+    router.delete('/:id', async (req, res) => {
+        const { id } = req.params;
+        const q = `DELETE FROM animals WHERE id = $1 RETURNING *`;
+        const { rows } = await pool.query<Animal>(q, [id]);
+
+        if (rows.length === 0) {
+            throw (
+                new SqlError(`Animal with id ${id} not found`),
+                {
+                    code: 'NOT_FOUND',
+                    sqlState: 'DELETE_FAILED',
+                    sqlMessage: `No animal found with id ${id}`,
+                }
+            );
+        }
+
+        return res.json(rows[0]);
     });
 
     return router;
