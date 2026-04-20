@@ -10,6 +10,7 @@ import { HttpError } from './errors/http-error.ts';
 import { errorHandler } from './middleware/error-handler.ts';
 import { apiController } from './controllers/api.ts';
 import { HomeView } from './views/home.ts';
+import { customHeaders } from './middleware/customs.ts';
 
 export const createApp = (pool: Pool) => {
     const log = debug(`${env.PROJECT_NAME}:app`);
@@ -25,6 +26,7 @@ export const createApp = (pool: Pool) => {
     );
     app.use(express.json());
     app.use(express.urlencoded());
+    app.use(customHeaders(env.PROJECT_NAME));
     app.use(express.static('public'));
 
     app.use('/health', (_req, res) => {
