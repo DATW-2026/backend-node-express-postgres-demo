@@ -31,6 +31,11 @@ export const createApp = (pool: Pool) => {
         });
     });
 
+    app.get('/', async (_req, res) => {
+        log('Received request to root endpoint');
+        return res.send('APP Root');
+    });
+
     app.use('/api/animals', animalsRouter(pool));
 
     app.use((_req, _res, next) => {
