@@ -4,8 +4,8 @@ import type { Pool } from 'pg';
 
 import { env } from '../../config/env.ts';
 import {
-    AnimalSchemaDTO,
-    AnimalSchemaUpdateDTO,
+    AnimalCreateSchema,
+    AnimalUpdateSchema,
     type Animal,
 } from '../schemas/animal.ts';
 import { HttpError } from '../../errors/http-error.ts';
@@ -55,7 +55,7 @@ export const animalsRouter = (pool: Pool) => {
     });
 
     router.post('/', async (req, res) => {
-        const parsed = AnimalSchemaDTO.safeParse(req.body);
+        const parsed = AnimalCreateSchema.safeParse(req.body);
 
         if (!parsed.success) {
             throw new HttpError(
@@ -100,7 +100,7 @@ export const animalsRouter = (pool: Pool) => {
     router.patch('/:id', async (req, res) => {
         const { id } = req.params;
 
-        const parsed = AnimalSchemaUpdateDTO.safeParse(req.body);
+        const parsed = AnimalUpdateSchema.safeParse(req.body);
 
         if (!parsed.success) {
             throw new HttpError(
