@@ -45,10 +45,10 @@ export const createApp = (pool: Pool) => {
 
     app.get('/api', apiController);
 
-    const appRepo = new AnimalsRepo(pool);
-    const appController = new AnimalsController(appRepo);
-    const appRouter = new AnimalsRouter(appController);
-    app.use('/api/animals', appRouter.router);
+    const animalRepo = new AnimalsRepo(pool);
+    const animalController = new AnimalsController(animalRepo);
+    const animalRouter = new AnimalsRouter(animalController);
+    app.use('/api/animals', animalRouter.router);
 
     //app.use('/api/animals', AnimalsRouter(pool));
 
