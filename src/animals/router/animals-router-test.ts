@@ -181,7 +181,6 @@ describe('Animals router', () => {
             assert.strictEqual(res.status, 200);
 
             const body = (await res.json()) as Animal;
-            console.log(body);
 
             assert.strictEqual(body.id, 5);
             assert.strictEqual(body.name, 'Águila actualizada');
