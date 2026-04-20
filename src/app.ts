@@ -8,6 +8,7 @@ import { env } from './config/env.ts';
 import { animalsRouter } from './animals/router/animals-router.ts';
 import { HttpError } from './errors/http-error.ts';
 import { errorHandler } from './middleware/error-handler.ts';
+import { apiController } from './controllers/api.ts';
 
 export const createApp = (pool: Pool) => {
     const log = debug(`${env.PROJECT_NAME}:app`);
@@ -35,6 +36,8 @@ export const createApp = (pool: Pool) => {
         log('Received request to root endpoint');
         return res.send('APP Root');
     });
+
+    app.get('/api', apiController);
 
     app.use('/api/animals', animalsRouter(pool));
 
