@@ -8,7 +8,8 @@
         "dev": "cross-env node --watch --env-file=.env ./src/index.ts",
         "test": "node --env-file=.env.test --test",
         "test:serie": "node --env-file=.env.test --test --test-concurrency=1",
-        "seed-db:dev": "node --env-file=.env ./src/animals/schemas/db-seed.ts"
+        "seed:dev": "node --env-file=.env ./src/animals/schemas/db-seed.ts",
+        "seed:test": "node --env-file=.env ./src/animals/schemas/db-seed-test.ts"
     },
     "repository": {
         "type": "git",
