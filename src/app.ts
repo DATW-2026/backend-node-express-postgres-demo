@@ -25,6 +25,7 @@ export const createApp = (pool: Pool) => {
     );
     app.use(express.json());
     app.use(express.urlencoded());
+    app.use(express.static('public'));
 
     app.use('/health', (_req, res) => {
         return res.json({
