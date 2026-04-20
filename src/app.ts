@@ -5,12 +5,14 @@ import cors from 'cors';
 import type { Pool } from 'pg';
 
 import { env } from './config/env.ts';
-import { animalsRouter } from './animals/router/animals-router.ts';
+import { AnimalsRouter } from './animals/routers/animals-router.ts';
 import { HttpError } from './errors/http-error.ts';
 import { errorHandler } from './middleware/error-handler.ts';
 import { apiController } from './controllers/api.ts';
 import { HomeView } from './views/home.ts';
 import { customHeaders } from './middleware/customs.ts';
+import { AnimalsRepo } from './animals/repositories/animals-repo.ts';
+import { AnimalsController } from './animals/controllers/animals-controller.ts';
 
 export const createApp = (pool: Pool) => {
     const log = debug(`${env.PROJECT_NAME}:app`);
@@ -43,7 +45,12 @@ export const createApp = (pool: Pool) => {
 
     app.get('/api', apiController);
 
-    app.use('/api/animals', animalsRouter(pool));
+    const appRepo = new AnimalsRepo(pool);
+    const appController = new AnimalsController(appRepo);
+    const appRouter = new AnimalsRouter(appController);
+    app.use('/api/animals', appRouter.router);
+
+    //app.use('/api/animals', AnimalsRouter(pool));
 
     app.use((_req, _res, next) => {
         log('Calling errorHandler for 404 error');
