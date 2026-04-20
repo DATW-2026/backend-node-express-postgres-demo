@@ -1,3 +1,9 @@
+import debug from 'debug';
+import { env } from '../config/env.ts';
+
+const log = debug(`${env.PROJECT_NAME}:sql-error`);
+log('Loading SQL error class...');
+
 type SqlErrorOptions = {
     code?: string;
     errno?: number;
