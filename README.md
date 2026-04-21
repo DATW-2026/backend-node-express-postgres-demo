@@ -25,8 +25,8 @@ Partimos de una API "base" que muestra el contenido del [readme.base.md](./readm
 1. Estructura de carpetas
     - src/
         - animals/
-            - entities/
-                - `animal.entity.ts` (definición de la entidad Animal)
+            - schemas/
+                - `animal.ts` (definición de la entidad Animal)
                 - `db-seed.ts` (función que utilizaSQL para crear la tabla de animales en la base de datos)
 2. Creamos el modelo de la entidad
 
@@ -50,15 +50,15 @@ Usaremos una arquitectura modular MVC + Repository para organizar el código de 
 
 - src/
     - animals/
-        - entities/
-            - `animal.entity.ts` (definición de la entidad Animal y sus DTOs)
+        - schemas/
+            - `animal.ts` (definición de la entidad Animal y sus DTOs)
             - `db-seed.ts` (función para preparar la base de datos con la tabla de animales)
         - repositories/
-            - `animal.repository.ts` (clase con la lógica de acceso a datos para la entidad Animal)
+            - `animal-repo.ts` (clase con la lógica de acceso a datos para la entidad Animal)
         - controllers/
-            - `animal.controller.ts` (clase con el controlador para manejar las solicitudes relacionadas con animales)
+            - `animal-controller.ts` (clase con el controlador para manejar las solicitudes relacionadas con animales)
         - routers/
-            - `animal.router.ts` (clase con la definición de las rutas relacionadas con animales, utilizando el servicio)
+            - `animal-router.ts` (clase con la definición de las rutas relacionadas con animales, utilizando el servicio)
 
 La secuencia de implementación será la siguiente:
 
@@ -78,8 +78,8 @@ El repositorio `AnimalRepository` se encargará de la lógica de acceso a datos 
             - `sql-error.ts` (clase para representar errores SQL personalizados)
         - animals/
             - repositories/
-                - `animal.repository.ts` (clase con la lógica de acceso a datos para la entidad Animal)
-                - `animal.repository.test.ts` (tests unitarios para el repositorio de animales)
+                - `animal-repo.ts` (clase con la lógica de acceso a datos para la entidad Animal)
+                - `animal-repo-test.ts` (tests unitarios para el repositorio de animales)
 - definición de la clase `AnimalRepository` con métodos para crear, leer, actualizar y eliminar animales en la base de datos
 - manejo de errores SQL utilizando la clase `SqlError` para representar errores personalizados relacionados con la base de datos
 - escribimos y ejecutamos tests de integración para el repositorio de animales, utilizando una base de datos de test preparada con la función `seedAnimalsTestDB` para asegurar que la tabla de animales esté creada y limpia antes de cada test.
@@ -92,8 +92,8 @@ El controlador `AnimalController` se encargará de manejar las solicitudes relac
     - src/
         - animals/
             - controllers/
-                - `animal.controller.ts` (clase con el controlador para manejar las solicitudes relacionadas con animales)
-                - `animal.controller.test.ts` (tests unitarios para el controlador de animales).
+                - `animal-controller.ts` (clase con el controlador para manejar las solicitudes relacionadas con animales)
+                - `animal-controller-test.ts` (tests unitarios para el controlador de animales).
 - definición de la clase `AnimalController` con métodos para manejar las solicitudes relacionadas con animales, utilizando el repositorio para realizar las operaciones necesarias en la base de datos
 - logueo de debug
     - al importar el módulo
@@ -111,7 +111,7 @@ El router `AnimalRouter` se encargará de definir las rutas relacionadas con ani
     - src/
         - animals/
             - routers/
-                - `animal.router.ts` (clase con la definición de las rutas relacionadas con animales, utilizando el servicio)
+                - `animal-router.ts` (clase con la definición de las rutas relacionadas con animales, utilizando el servicio)
 - definición de la clase `AnimalRouter` con el router de Express y el controller como dependencia inyectada.
 - logueo de debug
     - al importar el módulo
