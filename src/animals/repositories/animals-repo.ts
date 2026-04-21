@@ -1,6 +1,7 @@
 import debug from 'debug';
+
 import { env } from '../../config/env.ts';
-import type { Pool } from 'pg';
+import { PrismaClient } from '../../../generated/prisma/client.ts';
 import { SqlError } from '../../errors/sql-error.ts';
 import type {
     Animal,
@@ -12,50 +13,28 @@ const log = debug(`${env.PROJECT_NAME}:repo:animals`);
 log('Loading animals repository...');
 
 export class AnimalsRepo {
-    private pool: Pool;
-    constructor(pool: Pool) {
+    #prisma: PrismaClient;
+
+    constructor(prisma: PrismaClient) {
         log('Starting animals repository...');
-        this.pool = pool;
+        this.#prisma = prisma;
     }
 
     async readAllAnimals() {
         log('Reading all animals from database...');
-        const { rows } = await this.pool.query<Animal>(`
-            SELECT 
-                id, 
-                name, 
-                english_name AS "englishName", 
-                sci_name AS "sciName", 
-                diet, 
-                lifestyle, 
-                location, 
-                slogan, 
-                group_name AS "group", 
-                image
-            FROM animals`);
-        return rows as Animal[];
+        const result = await this.#prisma.animals.findMany();
+
+        return result;
     }
 
     async readAnimalById(id: number): Promise<Animal> {
         log(`Reading animal with id ${id} from database...`);
-        const q = `
-            SELECT 
-                id, 
-                name, 
-                english_name AS "englishName", 
-                sci_name AS "sciName", 
-                diet, 
-                lifestyle, 
-                location, 
-                slogan, 
-                group_name AS "group", 
-                image
-            FROM animals 
-            WHERE id = $1`;
 
-        const { rows } = await this.pool.query<Animal>(q, [id]);
+        const result = await this.#prisma.animals.findUnique({
+            where: { id: id },
+        });
 
-        if (rows.length === 0) {
+        if (!result) {
             throw new SqlError(`Animal with id ${id} not found`, {
                 code: 'NOT_FOUND',
                 sqlState: 'READ_FAILED',
@@ -63,46 +42,17 @@ export class AnimalsRepo {
             });
         }
 
-        return rows[0] as Animal;
+        return result as unknown as Animal;
     }
 
     async createAnimal(animal: AnimalCreateDTO): Promise<Animal> {
         log(`Creating animal with name ${animal.name}...`);
-        const q = `
-            INSERT INTO animals 
-                (name, 
-                english_name, 
-                sci_name, 
-                diet, 
-                lifestyle, 
-                location, 
-                slogan, 
-                group_name, 
-                image) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-            RETURNING 
-                id, 
-                name, 
-                english_name AS "englishName", 
-                sci_name AS "sciName", 
-                diet, 
-                lifestyle, 
-                location, 
-                slogan, 
-                group_name AS "group", 
-                image`;
-        const { rows } = await this.pool.query<Animal>(q, [
-            animal.name,
-            animal.englishName,
-            animal.sciName,
-            animal.diet,
-            animal.lifestyle,
-            animal.location,
-            animal.slogan,
-            animal.group,
-            animal.image,
-        ]);
-        return rows[0] as Animal;
+
+        const result = await this.#prisma.animals.create({
+            data: animal,
+        });
+
+        return result as unknown as Animal;
     }
 
     async updateAnimal(
