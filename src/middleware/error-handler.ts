@@ -3,6 +3,7 @@ import { env } from '../config/env.ts';
 import debug from 'debug';
 import { HttpError } from '../errors/http-error.ts';
 import { ZodError } from 'zod';
+import { SqlError } from '../errors/sql-error.ts';
 
 const log = debug(`${env.PROJECT_NAME}:error-handler`);
 log('Loading error handler...');
@@ -26,6 +27,10 @@ export const errorHandler = (
         res.statusCode = 400;
         res.statusMessage = 'Bad Request';
         res.json(error.issues);
+    } else if (error instanceof SqlError && error.code === 'NOT_FOUND') {
+        res.statusCode = 404;
+        res.statusMessage = 'Not Found';
+        res.send(error.message);
     } else if (error instanceof Error) {
         res.send(error.message);
     } else {

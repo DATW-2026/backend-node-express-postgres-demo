@@ -4,6 +4,7 @@ import type { AnimalsRepo } from '../repositories/animals-repo.ts';
 import type { NextFunction, Request, Response } from 'express';
 import { HttpError } from '../../errors/http-error.ts';
 import type { AnimalCreateDTO, AnimalUpdateDTO } from '../schemas/animal.ts';
+import { SqlError } from '../../errors/sql-error.ts';
 
 const log = debug(`${env.PROJECT_NAME}:controller:animals`);
 log('Starting animals controller...');
@@ -37,17 +38,22 @@ export class AnimalsController {
         log(`Getting animal with id ${id} from repository...`);
         try {
             const animal = await this.repo.readAnimalById(id);
-            if (!animal) {
-                const httpError = new HttpError(
-                    404,
-                    'Not Found',
-                    'Animal not found',
-                );
-                next(httpError);
-                return;
-            }
+            // if (!animal) {
+            //     const httpError = new HttpError(
+            //         404,
+            //         'Not Found',
+            //         'Animal not found',
+            //     );
+            //     next(httpError);
+            //     return;
+            // }
             res.json(animal);
         } catch (error: unknown) {
+            if (error instanceof SqlError) {
+                next(error);
+                return;
+            }
+
             log('Error occurred while fetching animal.');
             const httpError = new HttpError(
                 500,

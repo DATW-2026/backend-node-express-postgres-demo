@@ -49,7 +49,7 @@ export class AnimalsRepo {
         log(`Creating animal with name ${animal.name}...`);
 
         const result = await this.#prisma.animals.create({
-            data: animal,
+            data: animal as AnimalCreateDTO,
         });
 
         return result as unknown as Animal;
@@ -60,44 +60,15 @@ export class AnimalsRepo {
         animalData: AnimalUpdateDTO,
     ): Promise<Animal> {
         log(`Updating animal with id ${id}...`);
-        const q = `
-            UPDATE animals 
-            SET name = $2, 
-                english_name = COALESCE($3, english_name),
-                sci_name = COALESCE($4, sci_name),
-                diet = COALESCE($5, diet),
-                lifestyle = COALESCE($6, lifestyle),
-                location = COALESCE($7, location),
-                slogan = COALESCE($8, slogan),
-                group_name = COALESCE($9, group_name),
-                image = COALESCE($10, image)
-            WHERE 
-                id = $1
-            RETURNING 
-                id, 
-                name, 
-                english_name AS "englishName", 
-                sci_name AS "sciName", 
-                diet, 
-                lifestyle, 
-                location, 
-                slogan, 
-                group_name AS "group", 
-                image`;
-        const { rows } = await this.pool.query<Animal>(q, [
-            id,
-            animalData.name,
-            animalData.englishName,
-            animalData.sciName,
-            animalData.diet,
-            animalData.lifestyle,
-            animalData.location,
-            animalData.slogan,
-            animalData.group,
-            animalData.image,
-        ]);
 
-        if (rows.length === 0) {
+        const result = await this.#prisma.animals.update({
+            where: {
+                id: id,
+            },
+            data: animalData as AnimalUpdateDTO,
+        });
+
+        if (!result) {
             throw new SqlError(`Animal with id ${id} not found`, {
                 code: 'NOT_FOUND',
                 sqlState: 'UPDATE_FAILED',
@@ -105,7 +76,7 @@ export class AnimalsRepo {
             });
         }
 
-        return rows[0] as Animal;
+        return result as unknown as Animal;
     }
 
     async deleteAnimal(id: number): Promise<Animal> {
