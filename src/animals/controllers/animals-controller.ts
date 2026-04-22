@@ -15,14 +15,15 @@ export class AnimalsController {
         this.repo = repo;
     }
 
-    async getAllAnimals(req: Request, res: Response, next: NextFunction) {
+    async getAllAnimals(_req: Request, res: Response, next: NextFunction) {
         log('Getting all animals from repository...');
         try {
             const animals = await this.repo.readAllAnimals();
             res.json(animals);
         } catch (error: unknown) {
-            if (error instanceof SqlError || error instanceof HttpError) {
+            if (error instanceof SqlError) {
                 next(error);
+
                 return;
             }
 
@@ -43,23 +44,15 @@ export class AnimalsController {
         log(`Getting animal with id ${id} from repository...`);
         try {
             const animal = await this.repo.readAnimalById(id);
-            // if (!animal) {
-            //     const httpError = new HttpError(
-            //         404,
-            //         'Not Found',
-            //         'Animal not found',
-            //     );
-            //     next(httpError);
-            //     return;
-            // }
+
             res.json(animal);
         } catch (error: unknown) {
             if (error instanceof SqlError) {
                 next(error);
+
                 return;
             }
 
-            log('Error occurred while fetching animal.');
             const httpError = new HttpError(
                 500,
                 'Internal Server Error',
@@ -67,6 +60,8 @@ export class AnimalsController {
                 { cause: error },
             );
             next(httpError);
+
+            return;
         }
     }
 
@@ -74,11 +69,15 @@ export class AnimalsController {
         log('Creating new animal in repository...');
         try {
             const animalData = req.body as AnimalCreateDTO;
-            // body Validado por el middleware de validación
             const animal = await this.repo.createAnimal(animalData);
             res.status(201).json(animal);
         } catch (error: unknown) {
-            log('Error occurred while creating animal.');
+            if (error instanceof SqlError) {
+                next(error);
+
+                return;
+            }
+
             const httpError = new HttpError(
                 500,
                 'Internal Server Error',
@@ -86,6 +85,8 @@ export class AnimalsController {
                 { cause: error },
             );
             next(httpError);
+
+            return;
         }
     }
 
@@ -95,20 +96,15 @@ export class AnimalsController {
         log(`Updating animal with id ${id} in repository...`);
         try {
             const animalData = req.body as AnimalUpdateDTO;
-            // body Validado por el middleware de validación
             const animal = await this.repo.updateAnimal(id, animalData);
-            if (!animal) {
-                const httpError = new HttpError(
-                    404,
-                    'Not Found',
-                    'Animal not found',
-                );
-                next(httpError);
-                return;
-            }
+
             res.json(animal);
         } catch (error: unknown) {
-            log('Error occurred while updating animal.');
+            if (error instanceof SqlError) {
+                next(error);
+                return;
+            }
+
             const httpError = new HttpError(
                 500,
                 'Internal Server Error',
@@ -116,18 +112,23 @@ export class AnimalsController {
                 { cause: error },
             );
             next(httpError);
+
+            return;
         }
     }
 
     async deleteAnimal(req: Request, res: Response, next: NextFunction) {
         const id = Number(req.params.id);
-        // id Validado por el middleware de validación
         log(`Deleting animal with id ${id} from repository...`);
         try {
             await this.repo.deleteAnimal(id);
             res.status(204).send();
         } catch (error: unknown) {
-            log('Error occurred while deleting animal.');
+            if (error instanceof SqlError) {
+                next(error);
+                return;
+            }
+
             const httpError = new HttpError(
                 500,
                 'Internal Server Error',
@@ -135,6 +136,8 @@ export class AnimalsController {
                 { cause: error },
             );
             next(httpError);
+
+            return;
         }
     }
 }
