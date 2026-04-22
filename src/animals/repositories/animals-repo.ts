@@ -1,7 +1,7 @@
 import debug from 'debug';
 
 import { env } from '../../config/env.ts';
-import { PrismaClient } from '../../../generated/prisma/client.ts';
+import { Prisma, PrismaClient } from '../../../generated/prisma/client.ts';
 import { SqlError } from '../../errors/sql-error.ts';
 import type {
     Animal,
@@ -58,11 +58,23 @@ export class AnimalsRepo {
     async createAnimal(animal: AnimalCreateDTO): Promise<Animal> {
         log(`Creating animal with name ${animal.name}...`);
 
-        const result = await this.#prisma.animal.create({
-            data: animal as AnimalCreateDTO,
-        });
+        try {
+            const result = await this.#prisma.animal.create({
+                data: animal as AnimalCreateDTO,
+            });
 
-        return result as unknown as Animal;
+            return result as unknown as Animal;
+        } catch (error) {
+            const isNotFound =
+                error instanceof Prisma.PrismaClientKnownRequestError &&
+                error.code === 'P2025';
+            throw new SqlError(`...`, {
+                code: isNotFound ? 'NOT_FOUND' : 'UPDATE_FAILED',
+                sqlState: isNotFound ? 'NOT_FOUND' : 'UPDATE_FAILED',
+                sqlMessage: `An error occurred while creating the animal`,
+                cause: error,
+            });
+        }
     }
 
     async updateAnimal(
@@ -71,50 +83,49 @@ export class AnimalsRepo {
     ): Promise<Animal> {
         log(`Updating animal with id ${id}...`);
 
-        const result = await this.#prisma.animal.update({
-            where: {
-                id: id,
-            },
-            data: animalData as AnimalUpdateDTO,
-        });
+        const data = Object.fromEntries(
+            Object.entries(animalData).filter(
+                ([, value]) => value !== undefined,
+            ),
+        ) as Prisma.AnimalUpdateInput;
 
-        if (!result) {
-            throw new SqlError(`Animal with id ${id} not found`, {
+        try {
+            const result = await this.#prisma.animal.update({
+                where: {
+                    id: id,
+                },
+                data,
+            });
+
+            return result as unknown as Animal;
+        } catch (error) {
+            throw new SqlError(`Failed to update animal with id ${id}`, {
                 code: 'NOT_FOUND',
                 sqlState: 'UPDATE_FAILED',
-                sqlMessage: `No animal found with id ${id}`,
+                sqlMessage: `An error occurred while updating the animal with id ${id}`,
+                cause: error,
             });
         }
-
-        return result as unknown as Animal;
     }
 
     async deleteAnimal(id: number): Promise<Animal> {
         log(`Deleting animal with id ${id}...`);
-        const q = `
-            DELETE FROM animals 
-            WHERE id = $1 
-            RETURNING 
-                id, 
-                name, 
-                english_name AS "englishName", 
-                sci_name AS "sciName", 
-                diet, 
-                lifestyle, 
-                location, 
-                slogan, 
-                group_name AS "group", 
-                image`;
-        const { rows } = await this.pool.query<Animal>(q, [id]);
 
-        if (rows.length === 0) {
-            throw new SqlError(`Animal with id ${id} not found`, {
+        try {
+            const result = await this.#prisma.animal.delete({
+                where: {
+                    id: id,
+                },
+            });
+
+            return result as unknown as Animal;
+        } catch (error) {
+            throw new SqlError(`Failed to delete animal with id ${id}`, {
                 code: 'NOT_FOUND',
                 sqlState: 'DELETE_FAILED',
-                sqlMessage: `No animal found with id ${id}`,
+                sqlMessage: `An error occurred while deleting the animal with id ${id}`,
+                cause: error,
             });
         }
-
-        return rows[0] as Animal;
     }
 }
