@@ -12,3 +12,6 @@
 - Tests:
     - [Animals Repository](./src/animals/repositories/animals-repo-test.ts)
     - [Animals Controller](./src/animals/controllers/animals-controller-test.ts)
+
+- Comprobar que las tablas se crean y son plenamente funcionales
+- [db-seed](./src/config/db-seed-prisma.ts) -> Comprobar que la tabla se llena como debería
