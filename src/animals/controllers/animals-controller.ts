@@ -21,14 +21,19 @@ export class AnimalsController {
             const animals = await this.repo.readAllAnimals();
             res.json(animals);
         } catch (error: unknown) {
-            log('Error occurred while fetching animals.');
-            const httpError = new HttpError(
-                500,
-                'Internal Server Error',
-                'An error occurred while fetching animals',
-                { cause: error },
+            if (error instanceof SqlError || error instanceof HttpError) {
+                next(error);
+                return;
+            }
+
+            next(
+                new HttpError(
+                    500,
+                    'Internal Server Error',
+                    'An error occurred while fetching animals',
+                    { cause: error },
+                ),
             );
-            next(httpError);
         }
     }
 

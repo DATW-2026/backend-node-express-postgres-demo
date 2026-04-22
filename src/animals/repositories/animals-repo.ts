@@ -22,15 +22,25 @@ export class AnimalsRepo {
 
     async readAllAnimals() {
         log('Reading all animals from database...');
-        const result = await this.#prisma.animals.findMany();
 
-        return result;
+        try {
+            const result = await this.#prisma.animal.findMany();
+
+            return result;
+        } catch (error) {
+            log('Error occurred while reading all animals:', error);
+            throw new SqlError('Failed to read animals', {
+                code: 'READ_FAILED',
+                sqlState: 'READ_FAILED',
+                sqlMessage: 'An error occurred while reading animals',
+            });
+        }
     }
 
     async readAnimalById(id: number): Promise<Animal> {
         log(`Reading animal with id ${id} from database...`);
 
-        const result = await this.#prisma.animals.findUnique({
+        const result = await this.#prisma.animal.findUnique({
             where: { id: id },
         });
 
@@ -48,7 +58,7 @@ export class AnimalsRepo {
     async createAnimal(animal: AnimalCreateDTO): Promise<Animal> {
         log(`Creating animal with name ${animal.name}...`);
 
-        const result = await this.#prisma.animals.create({
+        const result = await this.#prisma.animal.create({
             data: animal as AnimalCreateDTO,
         });
 
@@ -61,7 +71,7 @@ export class AnimalsRepo {
     ): Promise<Animal> {
         log(`Updating animal with id ${id}...`);
 
-        const result = await this.#prisma.animals.update({
+        const result = await this.#prisma.animal.update({
             where: {
                 id: id,
             },
